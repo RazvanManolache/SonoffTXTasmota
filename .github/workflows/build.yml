@@ -32,9 +32,7 @@ jobs:
           sudo apt-get install -y --no-install-recommends libreadline-dev
           python tools/prepare_berry.py
           make -C .berry -j2
-          for script in autoexec.be tasmota.be txultimate.be; do
-            .berry/berry -g -c "$script" -o "$RUNNER_TEMP/$script.bec"
-          done
+          .berry/berry tools/check_berry.be
           python tools/check.py
       - name: Package and verify download
         run: python tools/package.py
