@@ -1,0 +1,43 @@
+name: Sonoff script package
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: build-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  package:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v7.1.0
+        with:
+          python-version: '3.13'
+      - name: Check out pinned Berry compiler
+        uses: actions/checkout@v7.0.1
+        with:
+          repository: berry-lang/berry
+          ref: 65fce31732a9bdb91cb42cfc86e2b40f16c57514
+          path: .berry
+          persist-credentials: false
+      - name: Compile checker and validate Berry scripts without executing hardware calls
+        run: |
+          make -C .berry -j2
+          for script in autoexec.be tasmota.be txultimate.be; do
+            .berry/berry -c "$script" -o "$RUNNER_TEMP/$script.bec"
+          done
+          python tools/check.py
+      - name: Package and verify download
+        run: python tools/package.py
+      - uses: actions/upload-artifact@v7.0.2
+        with:
+          name: Sonoff-TX-Ultimate-scripts
+          path: dist/*
+          if-no-files-found: error
+          retention-days: 30
