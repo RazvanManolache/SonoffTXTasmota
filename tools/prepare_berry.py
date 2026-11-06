@@ -19,3 +19,8 @@ new = '''    if (fout) {
 assert source.count(old) == 1, 'Pinned Berry debug implementation changed'
 source = source.replace(old, new).replace('char __lbuf[INST_BUF_SIZE + 1], __lbuf_tmp[INST_BUF_SIZE];', 'char __lbuf[INST_BUF_SIZE + 1];')
 path.write_text(source)
+path = Path('.berry/src/be_byteslib.c')
+source = path.read_text()
+old = 'ret_f = *(float*) &ret_i;'
+assert source.count(old) == 1, 'Pinned Berry float reader changed'
+path.write_text(source.replace(old, 'memcpy(&ret_f, &ret_i, sizeof(ret_f));'))

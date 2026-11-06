@@ -33,7 +33,7 @@ jobs:
           python tools/prepare_berry.py
           make -C .berry -j2
           for script in autoexec.be tasmota.be txultimate.be; do
-            .berry/berry -c "$script" -o "$RUNNER_TEMP/$script.bec"
+            .berry/berry -g -c "$script" -o "$RUNNER_TEMP/$script.bec"
           done
           python tools/check.py
       - name: Package and verify download
