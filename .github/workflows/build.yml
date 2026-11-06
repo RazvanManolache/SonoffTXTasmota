@@ -13,32 +13,39 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v7.0.1
-        with:
-          persist-credentials: false
-      - uses: actions/setup-python@v7.1.0
-        with:
-          python-version: '3.13'
-      - name: Check out pinned Berry compiler
-        uses: actions/checkout@v7.0.1
-        with:
-          repository: berry-lang/berry
-          ref: 65fce31732a9bdb91cb42cfc86e2b40f16c57514
-          path: .berry
-          persist-credentials: false
-      - name: Compile checker and validate Berry scripts without executing hardware calls
-        run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y --no-install-recommends libreadline-dev
-          python tools/prepare_berry.py
-          make -C .berry -j2
-          .berry/berry tools/check_berry.be
-          python tools/check.py
-      - name: Package and verify download
-        run: python tools/package.py
-      - uses: actions/upload-artifact@v7.0.2
-        with:
-          name: Sonoff-TX-Ultimate-scripts
-          path: dist/*
-          if-no-files-found: error
-          retention-days: 30
+    - uses: actions/checkout@v7.0.1
+      with:
+        persist-credentials: false
+    - uses: actions/setup-python@v7.1.0
+      with:
+        python-version: '3.13'
+    - name: Check out pinned Berry compiler
+      uses: actions/checkout@v7.0.1
+      with:
+        repository: berry-lang/berry
+        ref: 65fce31732a9bdb91cb42cfc86e2b40f16c57514
+        path: .berry
+        persist-credentials: false
+    - name: Compile checker and validate Berry scripts without executing hardware calls
+      run: |
+        sudo apt-get update -qq
+        sudo apt-get install -y --no-install-recommends libreadline-dev
+        python tools/prepare_berry.py
+        make -C .berry -j2
+        .berry/berry tools/check_berry.be
+        python tools/check.py
+    - name: Package and verify download
+      run: python tools/package.py
+    - uses: actions/github-script@v9
+      with:
+        script: |
+          const publish = require('./.github/scripts/publish-build.cjs');
+          await publish({github, context, core, glob, exec});
+      env:
+        BUILD_NAME: Sonoff-TX-Ultimate-scripts
+        BUILD_PATHS: dist/*
+        BUILD_HIDDEN: 'false'
+        BUILD_MISSING: error
+      if: (success()) && success() && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) && github.event_name != 'pull_request'
+    permissions:
+      contents: write
