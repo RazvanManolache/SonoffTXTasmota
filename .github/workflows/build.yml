@@ -28,6 +28,9 @@ jobs:
           persist-credentials: false
       - name: Compile checker and validate Berry scripts without executing hardware calls
         run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends libreadline-dev
+          python tools/prepare_berry.py
           make -C .berry -j2
           for script in autoexec.be tasmota.be txultimate.be; do
             .berry/berry -c "$script" -o "$RUNNER_TEMP/$script.bec"
