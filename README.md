@@ -13,3 +13,9 @@ It should support both lights and blinds. Will probably update it if I actually 
 - Have a build with berry and file system enabled (example of user_config_override.h for tasmota build included - it has more stuff than that, was overly ambitious)
 
 - Add the 3 .be files to file system (the txultimate.be is from this repo https://github.com/blakadder/tx-ultimate/)
+
+
+## GitHub builds
+
+See [BUILDING.md](BUILDING.md) for the manual build button, downloadable package,
+installation steps and what the checks cover.
